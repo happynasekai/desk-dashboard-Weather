@@ -8,7 +8,7 @@
         /* --- Base & Reset --- */
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
-            background-color: #121212; /* 高級感のあるディープブラック */
+            background-color: #121212; 
             color: #e0e0e0;
             font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", sans-serif;
             height: 100vh;
@@ -27,22 +27,23 @@
             min-height: 1040px;
             display: flex;
             flex-direction: column;
-            justify-content: space-between; 
-            padding: 4rem 5rem 5rem 5rem; 
+            justify-content: center; /* 全体を画面の上下中央に配置 */
+            align-items: center;
+            gap: 3rem; /* 時計と天気パネルの間の隙間を適正化 */
+            padding: 2rem 4rem; 
             transform-origin: center center;
         }
 
-        /* --- 1. Premium Clock Area --- */
+        /* --- 1. Clock Area --- */
         .clock-area {
             display: flex;
             flex-direction: column;
             align-items: center;
             color: #ffffff;
             width: 100%;
-            margin-top: 1rem;
         }
         .clock-date {
-            font-size: 3.2rem;
+            font-size: 2.2rem; /* サイズを元に戻す */
             margin-bottom: 0.5rem;
             letter-spacing: 0.08em;
             font-weight: 500;
@@ -50,24 +51,25 @@
         }
         .clock-time {
             font-family: 'Courier New', Courier, monospace;
-            font-size: 11rem; 
+            font-size: 7.5rem; /* サイズを元に戻す */
             font-weight: bold;
             letter-spacing: 0.05em;
             line-height: 1;
-            text-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+            text-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
         }
 
-        /* --- 2. Premium Weather Hub --- */
+        /* --- 2. Weather Hub --- */
         .weather-wrapper {
             width: 100%;
+            max-width: 840px; /* 横幅を少し引き締め */
             background-color: #1a1a1a;
-            padding: 3.5rem 4.5rem; 
-            border-radius: 24px; 
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6); 
+            padding: 2.5rem 3.5rem; /* 内側の余白を削減 */
+            border-radius: 20px; 
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6); 
             border: 1px solid #2a2a2a;
             display: flex;
             flex-direction: column;
-            gap: 2.5rem; 
+            gap: 1.5rem; /* セクション間の隙間を削減 */
         }
 
         /* [Section A] Today's Weather Overview */
@@ -76,16 +78,16 @@
             justify-content: space-between;
             align-items: flex-end;
             width: 100%;
-            padding-bottom: 2rem;
+            padding-bottom: 1.5rem; /* 下部余白を削減 */
             border-bottom: 1px solid #333;
         }
         .tm-left {
             display: flex;
             flex-direction: column;
-            gap: 1.2rem;
+            gap: 0.8rem;
         }
         .tm-desc {
-            font-size: 3.5rem; 
+            font-size: 2.6rem; /* サイズ調整 */
             font-weight: bold;
             color: #ffffff;
             letter-spacing: 0.05em;
@@ -94,17 +96,17 @@
         .tm-meta {
             display: flex;
             align-items: center;
-            gap: 2.5rem;
-            font-size: 1.8rem; 
+            gap: 2rem;
+            font-size: 1.5rem; 
             color: #aaaaaa;
         }
         .tm-meta-loc { color: #dddddd; font-weight: 500; }
-        .meta-item { display: flex; align-items: center; gap: 0.6rem; }
-        .meta-item svg { fill: currentColor; opacity: 0.8; font-size: 1.6rem; }
+        .meta-item { display: flex; align-items: center; gap: 0.5rem; }
+        .meta-item svg { fill: currentColor; opacity: 0.8; font-size: 1.3rem; }
         
         .tm-right { text-align: right; }
         .tm-current-temp {
-            font-size: 8.5rem; 
+            font-size: 7rem; /* サイズ調整 */
             font-weight: 300;
             line-height: 0.8;
             color: #ffffff;
@@ -116,40 +118,40 @@
             display: flex;
             justify-content: space-between;
             width: 100%;
-            padding: 1rem 0 2rem 0;
+            padding: 0.8rem 0 1.2rem 0; /* 上下余白を削減 */
             border-bottom: 1px solid #333;
         }
         .hourly-item {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 1rem;
+            gap: 0.8rem;
         }
-        .hr-time { font-size: 1.6rem; font-weight: bold; color: #cccccc; }
-        .hr-icon { width: 44px; height: 44px; color: #ffffff; fill: currentColor; } 
-        .hr-temp { font-size: 2rem; font-weight: bold; color: #ffffff; }
-        .hr-rain { font-size: 1.4rem; color: #64b5f6; font-weight: bold; }
+        .hr-time { font-size: 1.4rem; font-weight: bold; color: #cccccc; }
+        .hr-icon { width: 34px; height: 34px; color: #ffffff; fill: currentColor; } 
+        .hr-temp { font-size: 1.6rem; font-weight: bold; color: #ffffff; }
+        .hr-rain { font-size: 1.2rem; color: #64b5f6; font-weight: bold; }
 
         /* [Section C] Weekly Forecast List */
         .forecast-list {
             display: flex;
             flex-direction: column;
-            gap: 1.5rem; 
+            gap: 1.2rem; /* リストの行間を縮小 */
             width: 100%;
             padding-top: 0.5rem;
         }
         .forecast-row-min {
             display: grid;
-            grid-template-columns: 130px 1fr auto; 
+            grid-template-columns: 100px 1fr auto; 
             align-items: center;
             width: 100%;
-            font-size: 1.8rem; 
+            font-size: 1.5rem; /* サイズ調整 */
         }
         .fc-date { font-weight: bold; letter-spacing: 0.05em; }
         .fc-desc { color: #cccccc; padding-left: 1rem; }
         .fc-meta {
             display: grid;
-            grid-template-columns: 95px 95px 95px; 
+            grid-template-columns: 85px 85px 85px; 
             justify-items: start; 
             color: #aaaaaa;
         }

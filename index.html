@@ -27,10 +27,12 @@
             min-height: 1040px;
             display: flex;
             flex-direction: column;
-            justify-content: center; /* 全体を画面の上下中央に配置 */
+            justify-content: center; 
             align-items: center;
-            gap: 3rem; /* 時計と天気パネルの間の隙間を適正化 */
-            padding: 2rem 4rem; 
+            /* 時計と天気の隙間を「くっつきそうなくらい」に縮小 */
+            gap: 1.2rem; 
+            /* 上部に余白を多く取り、全体を下へ押し下げる */
+            padding: 6rem 4rem 1rem 4rem; 
             transform-origin: center center;
         }
 
@@ -43,7 +45,7 @@
             width: 100%;
         }
         .clock-date {
-            font-size: 2.2rem; /* サイズを元に戻す */
+            font-size: 2.2rem; 
             margin-bottom: 0.5rem;
             letter-spacing: 0.08em;
             font-weight: 500;
@@ -51,7 +53,7 @@
         }
         .clock-time {
             font-family: 'Courier New', Courier, monospace;
-            font-size: 7.5rem; /* サイズを元に戻す */
+            font-size: 7.5rem; 
             font-weight: bold;
             letter-spacing: 0.05em;
             line-height: 1;
@@ -61,15 +63,15 @@
         /* --- 2. Weather Hub --- */
         .weather-wrapper {
             width: 100%;
-            max-width: 840px; /* 横幅を少し引き締め */
+            max-width: 840px; 
             background-color: #1a1a1a;
-            padding: 2.5rem 3.5rem; /* 内側の余白を削減 */
+            padding: 2.5rem 3.5rem; 
             border-radius: 20px; 
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6); 
             border: 1px solid #2a2a2a;
             display: flex;
             flex-direction: column;
-            gap: 1.5rem; /* セクション間の隙間を削減 */
+            gap: 1.5rem; 
         }
 
         /* [Section A] Today's Weather Overview */
@@ -78,7 +80,7 @@
             justify-content: space-between;
             align-items: flex-end;
             width: 100%;
-            padding-bottom: 1.5rem; /* 下部余白を削減 */
+            padding-bottom: 1.5rem; 
             border-bottom: 1px solid #333;
         }
         .tm-left {
@@ -87,7 +89,7 @@
             gap: 0.8rem;
         }
         .tm-desc {
-            font-size: 2.6rem; /* サイズ調整 */
+            font-size: 2.6rem; 
             font-weight: bold;
             color: #ffffff;
             letter-spacing: 0.05em;
@@ -106,7 +108,7 @@
         
         .tm-right { text-align: right; }
         .tm-current-temp {
-            font-size: 7rem; /* サイズ調整 */
+            font-size: 7rem; 
             font-weight: 300;
             line-height: 0.8;
             color: #ffffff;
@@ -118,7 +120,7 @@
             display: flex;
             justify-content: space-between;
             width: 100%;
-            padding: 0.8rem 0 1.2rem 0; /* 上下余白を削減 */
+            padding: 0.8rem 0 1.2rem 0; 
             border-bottom: 1px solid #333;
         }
         .hourly-item {
@@ -136,7 +138,8 @@
         .forecast-list {
             display: flex;
             flex-direction: column;
-            gap: 1.2rem; /* リストの行間を縮小 */
+            /* 行間をさらに少し狭め、コンパクトに */
+            gap: 1rem; 
             width: 100%;
             padding-top: 0.5rem;
         }
@@ -145,13 +148,14 @@
             grid-template-columns: 100px 1fr auto; 
             align-items: center;
             width: 100%;
-            font-size: 1.5rem; /* サイズ調整 */
+            font-size: 1.5rem; 
         }
         .fc-date { font-weight: bold; letter-spacing: 0.05em; }
         .fc-desc { color: #cccccc; padding-left: 1rem; }
         .fc-meta {
             display: grid;
-            grid-template-columns: 85px 85px 85px; 
+            /* 最高気温・最低気温の幅(110px)を広げて間隔をあけ、降水(85px)は位置固定 */
+            grid-template-columns: 110px 110px 85px; 
             justify-items: start; 
             color: #aaaaaa;
         }

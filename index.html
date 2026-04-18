@@ -141,21 +141,32 @@
             padding-top: 0.5rem;
         }
         
-        /* === NEW: 完全5列独立グリッドレイアウト === */
+        /* === 5列グリッドレイアウト === */
         .forecast-row-min {
             display: grid;
-            /* 1:日付(100px固定) 
-               2:天気(最長文字対応で広めに280px固定)
-               3:最高気温(余った空間を均等に: 1fr)
-               4:最低気温(余った空間を均等に: 1fr)
-               5:降水確率(85px固定で右へ) */
-            grid-template-columns: 100px 280px 1fr 1fr 85px; 
+            grid-template-columns: 100px 210px 110px 110px 110px;
+            column-gap: 22px;
             align-items: center;
             width: 100%;
-            font-size: 1.5rem; 
+            font-size: 1.5rem;
         }
         .fc-date { font-weight: bold; letter-spacing: 0.05em; }
-        .fc-desc { color: #cccccc; padding-left: 1rem; }
+        .fc-desc {
+            color: #cccccc;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        /* データ列: アイコンと値を密着・列内右揃え */
+        .fc-data {
+            display: flex;
+            align-items: center;
+            gap: 0.3em;
+            justify-content: flex-end;
+        }
+        .fc-data span {
+            font-variant-numeric: tabular-nums;
+        }
 
         /* Color Utilities */
         .sunday, .holiday { color: #ff5252; }
@@ -323,9 +334,9 @@
             } catch (e) { return "現在地"; }
         }
 
-        const svgUp = `<svg viewBox="0 0 384 512" height="1em" width="1em"><path d="M214.6 41.4c-12.5-12.5-32.8-12.5-45.3 0l-160 160c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L160 141.2 160 448c0 17.7 14.3 32 32 32s32-14.3 32-32l0-306.7L329.4 246.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3l-160-160z"></path></svg>`;
-        const svgDown = `<svg viewBox="0 0 384 512" height="1em" width="1em"><path d="M169.4 470.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 370.8 224 64c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 306.7L54.6 265.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"></path></svg>`;
-        const svgDrop = `<svg viewBox="0 0 384 512" height="1em" width="1em"><path d="M192 512C86 512 0 426 0 320C0 228.8 130.2 57.7 166.6 11.7C172.6 4.2 181.5 0 191.1 0l1.8 0c9.6 0 18.5 4.2 24.5 11.7C253.8 57.7 384 228.8 384 320c0 106-86 192-192 192zM96 336c0-8.8-7.2-16-16-16s-16 7.2-16 16c0 61.9 50.1 112 112 112c8.8 0 16-7.2 16-16s-7.2-16-16-16c-44.2 0-80-35.8-80-80z"></path></svg>`;
+        const svgUp = `<svg viewBox="0 0 384 512" height="1em" width="1em" fill="currentColor"><path d="M214.6 41.4c-12.5-12.5-32.8-12.5-45.3 0l-160 160c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L160 141.2 160 448c0 17.7 14.3 32 32 32s32-14.3 32-32l0-306.7L329.4 246.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3l-160-160z"></path></svg>`;
+        const svgDown = `<svg viewBox="0 0 384 512" height="1em" width="1em" fill="currentColor"><path d="M169.4 470.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 370.8 224 64c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 306.7L54.6 265.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"></path></svg>`;
+        const svgDrop = `<svg viewBox="0 0 384 512" height="1em" width="1em" fill="currentColor"><path d="M192 512C86 512 0 426 0 320C0 228.8 130.2 57.7 166.6 11.7C172.6 4.2 181.5 0 191.1 0l1.8 0c9.6 0 18.5 4.2 24.5 11.7C253.8 57.7 384 228.8 384 320c0 106-86 192-192 192zM96 336c0-8.8-7.2-16-16-16s-16 7.2-16 16c0 61.9 50.1 112 112 112c8.8 0 16-7.2 16-16s-7.2-16-16-16c-44.2 0-80-35.8-80-80z"></path></svg>`;
 
         async function updateWeather() {
             let lat = DEFAULT_LAT;
@@ -422,15 +433,20 @@
                     const rain = data.daily.precipitation_probability_max[i];
                     const code = data.daily.weathercode[i];
 
-                    // --- NEW: フラットな5列構造で描画 ---
+                    // 1桁は図形スペース（数字幅）でパディング、十の位に0は不使用
+                    const FIG = '\u2007'; // figure space: digits と同幅
+                    const fmtT = n => `${Math.abs(n) < 10 ? FIG : ''}${n}°`;
+                    const fmtR = n => `${n < 10 ? FIG : ''}${n}%`;
+
+                    // --- 5列構造で描画: 各列右揃え ---
                     const row = document.createElement('div');
                     row.className = 'forecast-row-min';
                     row.innerHTML = `
                         <div class="fc-date ${dateClass}">${m}/${d}(${days[w]})</div>
                         <div class="fc-desc">${getWeatherText(code)}</div>
-                        <div class="meta-item text-high">${svgUp}<span>${high}°</span></div>
-                        <div class="meta-item text-low">${svgDown}<span>${low}°</span></div>
-                        <div class="meta-item text-rain" style="justify-self: end;">${svgDrop}<span>${rain}%</span></div>
+                        <div class="fc-data text-high">${svgUp}<span>${fmtT(high)}</span></div>
+                        <div class="fc-data text-low">${svgDown}<span>${fmtT(low)}</span></div>
+                        <div class="fc-data text-rain">${svgDrop}<span>${fmtR(rain)}</span></div>
                     `;
                     listContainer.appendChild(row);
                 }

@@ -175,6 +175,107 @@
         .text-low { color: #888888; }
         .text-rain { color: #64b5f6; }
 
+        /* ============================================
+           スマホ対応 レスポンシブ (max-width: 600px)
+           ============================================ */
+        @media (max-width: 600px) {
+            /* bodyをスクロール可能に */
+            body {
+                height: auto;
+                min-height: 100vh;
+                overflow-y: auto;
+                overflow-x: hidden;
+                align-items: flex-start;
+                padding: 1.5rem 0 2rem 0;
+            }
+
+            /* コンテナの固定サイズを解除 */
+            #app-container {
+                width: 100%;
+                min-width: unset;
+                height: auto;
+                min-height: unset;
+                padding: 1rem 1rem 1.5rem 1rem;
+                gap: 1rem;
+                transform: none !important; /* スケーリング無効化 */
+            }
+
+            /* 時計：フォントサイズを縮小 */
+            .clock-date {
+                font-size: 1.1rem;
+                margin-bottom: 0.3rem;
+            }
+            .clock-time {
+                font-size: 4rem;
+            }
+
+            /* 天気カード：パディング縮小 */
+            .weather-wrapper {
+                padding: 1.2rem 1rem;
+                border-radius: 16px;
+                gap: 1rem;
+            }
+
+            /* 今日の天気：縦並びに変更 */
+            .today-minimal {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.8rem;
+                padding-bottom: 1rem;
+            }
+            .tm-desc {
+                font-size: 1.6rem;
+            }
+            .tm-meta {
+                font-size: 1rem;
+                gap: 1rem;
+                flex-wrap: wrap;
+            }
+            .tm-right {
+                text-align: left;
+            }
+            .tm-current-temp {
+                font-size: 4.5rem;
+                line-height: 1;
+            }
+
+            /* 時間別予報：アイテムを小さく */
+            .hourly-item {
+                gap: 0.5rem;
+            }
+            .hr-time { font-size: 1rem; }
+            .hr-icon { width: 24px; height: 24px; }
+            .hr-temp { font-size: 1.1rem; }
+            .hr-rain { font-size: 0.9rem; }
+
+            /* 週間予報グリッド：4列に再配置（天気説明を省略） */
+            .forecast-row-min {
+                grid-template-columns: 5.5rem 1fr auto auto auto;
+                column-gap: 8px;
+                font-size: 1rem;
+            }
+            /* スマホでは天気説明列を非表示 */
+            .forecast-row-min .fc-desc {
+                display: none;
+            }
+            /* 天気説明を非表示にしたので、日付列を少し広げる */
+            .forecast-row-min {
+                grid-template-columns: 5.5rem 2fr auto auto;
+            }
+            /* データ列のアイコンサイズ調整 */
+            .fc-data svg {
+                height: 0.85em;
+                width: 0.85em;
+            }
+        }
+
+        /* さらに小さい端末（320px以下）向け微調整 */
+        @media (max-width: 360px) {
+            .clock-time { font-size: 3.2rem; }
+            .tm-current-temp { font-size: 3.8rem; }
+            .forecast-row-min { font-size: 0.9rem; column-gap: 6px; }
+        }
+
     </style>
 </head>
 <body>
@@ -221,8 +322,13 @@
     </div>
 
     <script>
-        // --- 0. オートスケーリング ---
+        // --- 0. オートスケーリング（PC用） ---
         function fitToScreen() {
+            // スマホ幅（600px以下）ではCSSのレスポンシブレイアウトに任せてスケーリングしない
+            if (window.innerWidth <= 600) {
+                document.getElementById('app-container').style.transform = 'none';
+                return;
+            }
             const baseWidth = 960;
             const baseHeight = 1040;
             const scale = Math.min(window.innerWidth / baseWidth, window.innerHeight / baseHeight);

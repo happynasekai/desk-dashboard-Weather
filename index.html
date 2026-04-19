@@ -223,28 +223,34 @@
                 gap: 1rem;
             }
 
-            /* 今日の天気：縦並びに変更 */
+            /* 今日の天気：横並びを維持、フォントを縮小して収める */
             .today-minimal {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 0.8rem;
+                flex-direction: row;
+                align-items: center;
+                gap: 0.5rem;
                 padding-bottom: 1rem;
             }
+            .tm-left {
+                gap: 0.4rem;
+                flex: 1;
+                min-width: 0; /* テキストの溢れ防止 */
+            }
             .tm-desc {
-                font-size: 1.6rem;
+                font-size: 1.3rem;
             }
             .tm-meta {
-                font-size: 1rem;
-                gap: 1rem;
+                font-size: 0.85rem;
+                gap: 0.6rem;
                 flex-wrap: wrap;
             }
             .tm-right {
-                text-align: left;
+                text-align: right;
+                flex-shrink: 0;
             }
             .tm-current-temp {
-                font-size: 4.5rem;
+                font-size: 3.5rem;
                 line-height: 1;
-                white-space: nowrap; /* 気温の数字が改行されないように */
+                white-space: nowrap;
             }
 
             /* 時間別予報：アイテムを小さく */

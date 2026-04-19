@@ -19,6 +19,13 @@
             align-items: center;
         }
 
+        /* スマホ時にbodyのoverflow:hiddenをリセット */
+        @media (max-width: 600px) {
+            body {
+                overflow: visible !important;
+            }
+        }
+
         /* --- Scaling Container --- */
         #app-container {
             width: 960px;
@@ -237,6 +244,7 @@
             .tm-current-temp {
                 font-size: 4.5rem;
                 line-height: 1;
+                white-space: nowrap; /* 気温の数字が改行されないように */
             }
 
             /* 時間別予報：アイテムを小さく */

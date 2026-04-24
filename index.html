@@ -70,13 +70,13 @@
             width: 100%;
             max-width: 840px; 
             background-color: #1a1a1a;
-            padding: 2.5rem 3.5rem; 
+            padding: 2.0rem 3.5rem; 
             border-radius: 20px; 
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6); 
             border: 1px solid #2a2a2a;
             display: flex;
             flex-direction: column;
-            gap: 1.5rem; 
+            gap: 1.2rem; 
         }
 
         /* [Section A] Today's Weather Overview */
@@ -85,7 +85,7 @@
             justify-content: space-between;
             align-items: flex-end;
             width: 100%;
-            padding-bottom: 1.5rem; 
+            padding-bottom: 1.2rem; 
             border-bottom: 1px solid #333;
         }
         .tm-left {
@@ -125,7 +125,7 @@
             display: flex;
             justify-content: space-between;
             width: 100%;
-            padding: 0.8rem 0 1.2rem 0; 
+            padding: 0.6rem 0 1.0rem 0; 
             border-bottom: 1px solid #333;
         }
         .hourly-item {
@@ -143,9 +143,9 @@
         .forecast-list {
             display: flex;
             flex-direction: column;
-            gap: 1.2rem; 
+            gap: 0.85rem; 
             width: 100%;
-            padding-top: 0.5rem;
+            padding-top: 0.3rem;
         }
         
         /* === 5列グリッドレイアウト === */
@@ -155,7 +155,7 @@
             column-gap: 22px;
             align-items: center;
             width: 100%;
-            font-size: 1.5rem;
+            font-size: 1.4rem;
         }
         .fc-date { font-weight: bold; letter-spacing: 0.05em; }
         .fc-desc {
@@ -193,7 +193,7 @@
                 overflow-y: auto;
                 overflow-x: hidden;
                 align-items: flex-start;
-                padding: 1.5rem 0 2rem 0;
+                padding: 1rem 0 1.2rem 0;
             }
 
             /* コンテナの固定サイズを解除 */
@@ -202,8 +202,8 @@
                 min-width: unset;
                 height: auto;
                 min-height: unset;
-                padding: 1rem 0.8rem 1.5rem 0.8rem;
-                gap: 1rem;
+                padding: 0.6rem 0.8rem 1rem 0.8rem;
+                gap: 0.7rem;
                 transform: none !important; /* スケーリング無効化 */
             }
 
@@ -218,9 +218,9 @@
 
             /* 天気カード：パディング縮小 */
             .weather-wrapper {
-                padding: 1.2rem 0.9rem;
+                padding: 1rem 0.9rem;
                 border-radius: 16px;
-                gap: 1rem;
+                gap: 0.7rem;
             }
 
             /* 今日の天気：横並びを維持、フォントを縮小して収める */
@@ -228,7 +228,7 @@
                 flex-direction: row;
                 align-items: center;
                 gap: 0.5rem;
-                padding-bottom: 1rem;
+                padding-bottom: 0.7rem;
             }
             .tm-left {
                 gap: 0.4rem;
@@ -264,6 +264,10 @@
 
             /* === 週間予報グリッド：天気テキストを表示したまま5列を維持 === */
             /* 日付 / 天気テキスト / 最高 / 最低 / 降水確率 を全て表示 */
+            .forecast-list {
+                gap: 0.6rem;
+                padding-top: 0.2rem;
+            }
             .forecast-row-min {
                 grid-template-columns: 3.6rem minmax(0, 1fr) auto auto auto;
                 column-gap: 6px;
@@ -599,13 +603,13 @@
                     }
                 }
 
-                // --- 3. 週間予報 (6日分) ---
+                // --- 3. 週間予報 (7日分) ---
                 const listContainer = document.getElementById('forecast-list');
                 listContainer.innerHTML = '';
                 const days = ['日', '月', '火', '水', '木', '金', '土'];
                 const baseDate = new Date();
 
-                for (let i = 1; i <= 6; i++) {
+                for (let i = 1; i <= 7; i++) {
                     const targetDate = new Date();
                     targetDate.setDate(baseDate.getDate() + i);
                     

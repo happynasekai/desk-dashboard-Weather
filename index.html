@@ -202,7 +202,7 @@
                 min-width: unset;
                 height: auto;
                 min-height: unset;
-                padding: 1rem 1rem 1.5rem 1rem;
+                padding: 1rem 0.8rem 1.5rem 0.8rem;
                 gap: 1rem;
                 transform: none !important; /* スケーリング無効化 */
             }
@@ -218,7 +218,7 @@
 
             /* 天気カード：パディング縮小 */
             .weather-wrapper {
-                padding: 1.2rem 1rem;
+                padding: 1.2rem 0.9rem;
                 border-radius: 16px;
                 gap: 1rem;
             }
@@ -262,32 +262,41 @@
             .hr-temp { font-size: 1.1rem; }
             .hr-rain { font-size: 0.9rem; }
 
-            /* 週間予報グリッド：4列に再配置（天気説明を省略） */
+            /* === 週間予報グリッド：天気テキストを表示したまま5列を維持 === */
+            /* 日付 / 天気テキスト / 最高 / 最低 / 降水確率 を全て表示 */
             .forecast-row-min {
-                grid-template-columns: 5.5rem 1fr auto auto auto;
-                column-gap: 8px;
-                font-size: 1rem;
+                grid-template-columns: 3.6rem minmax(0, 1fr) auto auto auto;
+                column-gap: 6px;
+                font-size: 0.85rem;
             }
-            /* スマホでは天気説明列を非表示 */
+            /* 天気テキスト列：必ず表示（省略は ellipsis で対応） */
             .forecast-row-min .fc-desc {
-                display: none;
-            }
-            /* 天気説明を非表示にしたので、日付列を少し広げる */
-            .forecast-row-min {
-                grid-template-columns: 5.5rem 2fr auto auto;
+                display: block;
+                font-size: 0.85rem;
+                min-width: 0;
             }
             /* データ列のアイコンサイズ調整 */
             .fc-data svg {
                 height: 0.85em;
                 width: 0.85em;
             }
+            .fc-data {
+                gap: 0.2em;
+            }
         }
 
-        /* さらに小さい端末（320px以下）向け微調整 */
+        /* さらに小さい端末（360px以下）向け微調整 */
         @media (max-width: 360px) {
             .clock-time { font-size: 3.2rem; }
-            .tm-current-temp { font-size: 3.8rem; }
-            .forecast-row-min { font-size: 0.9rem; column-gap: 6px; }
+            .tm-current-temp { font-size: 3.2rem; }
+            .forecast-row-min {
+                font-size: 0.78rem;
+                column-gap: 4px;
+                grid-template-columns: 3.2rem minmax(0, 1fr) auto auto auto;
+            }
+            .forecast-row-min .fc-desc {
+                font-size: 0.78rem;
+            }
         }
 
     </style>
@@ -402,6 +411,9 @@
         const DEFAULT_LAT = 35.5316;
         const DEFAULT_LON = 139.4907;
 
+        // 直近のhourlyデータを保持（メインパネルのリアルタイム連動に使用）
+        let latestHourlyData = null;
+
         function getWeatherText(code) {
             const map = {
                 0: "快晴", 1: "晴れ", 2: "一部曇り", 3: "曇り",
@@ -420,7 +432,9 @@
             const icons = {
                 sun: '<path d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zm0 9c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zM12 1v2m0 18v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke="currentColor" stroke-width="2" fill="none"/>',
                 cloud: '<path d="M19.36 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.64-4.96z" fill="currentColor"/>',
-                rain: '<path d="M19.36 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.64-4.96zM11 15l-2 4m4-4l-2 4m4-4l-2 4" fill="currentColor" stroke="currentColor" stroke-width="1"/>',
+                // 雨アイコン: 雲をfillで描画したあと、雨粒を太く・長いストロークで明示的に描く
+                // 雨粒のラインは stroke-width:3, linecap:round で「曇り」と一目で区別できるようにする
+                rain: '<path d="M19.36 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.64-4.96z" fill="currentColor"/><g stroke="currentColor" stroke-width="3" stroke-linecap="round" fill="none"><line x1="8.5" y1="17" x2="6.5" y2="22"/><line x1="13" y1="17" x2="11" y2="22"/><line x1="17.5" y1="17" x2="15.5" y2="22"/></g>',
                 snow: '<path d="M12 2L12 22M2 12L22 12M5 5L19 19M5 19L19 5" stroke="currentColor" stroke-width="2" />',
                 thunder: '<path d="M7 14l5-9v5h4l-5 9v-5H7z" fill="currentColor"/>'
             };
@@ -458,6 +472,64 @@
         const svgDown = `<svg viewBox="0 0 384 512" height="1em" width="1em" fill="currentColor"><path d="M169.4 470.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 370.8 224 64c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 306.7L54.6 265.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"></path></svg>`;
         const svgDrop = `<svg viewBox="0 0 384 512" height="1em" width="1em" fill="currentColor"><path d="M192 512C86 512 0 426 0 320C0 228.8 130.2 57.7 166.6 11.7C172.6 4.2 181.5 0 191.1 0l1.8 0c9.6 0 18.5 4.2 24.5 11.7C253.8 57.7 384 228.8 384 320c0 106-86 192-192 192zM96 336c0-8.8-7.2-16-16-16s-16 7.2-16 16c0 61.9 50.1 112 112 112c8.8 0 16-7.2 16-16s-7.2-16-16-16c-44.2 0-80-35.8-80-80z"></path></svg>`;
 
+        /**
+         * 現在時刻が属する3時間枠の hourly index を返す。
+         * 例: 14:30 → 直近の 12:00 枠 (12時 <= now < 15時)
+         * @param {object} hourly - data.hourly オブジェクト
+         * @returns {number} 該当する hourly 配列のインデックス。見つからなければ 0。
+         */
+        function findCurrentHourlyIndex(hourly) {
+            if (!hourly || !Array.isArray(hourly.time)) return 0;
+            const now = new Date();
+            // 現在時刻を含む3時間枠の開始時刻を計算 (例: 14時 → 12時, 17時 → 15時)
+            const slotStartHour = Math.floor(now.getHours() / 3) * 3;
+            const slotStart = new Date(now);
+            slotStart.setHours(slotStartHour, 0, 0, 0);
+            const slotEnd = new Date(slotStart);
+            slotEnd.setHours(slotStart.getHours() + 3);
+
+            // hourly.time から該当枠の開始時刻に一致するインデックスを探す
+            for (let i = 0; i < hourly.time.length; i++) {
+                const t = new Date(hourly.time[i]);
+                if (t.getTime() === slotStart.getTime()) {
+                    return i;
+                }
+            }
+
+            // 完全一致が見つからない場合は、現在時刻直前の最も近い時刻を採用
+            let bestIdx = 0;
+            for (let i = 0; i < hourly.time.length; i++) {
+                const t = new Date(hourly.time[i]);
+                if (t <= now) {
+                    bestIdx = i;
+                } else {
+                    break;
+                }
+            }
+            return bestIdx;
+        }
+
+        /**
+         * メインパネル（天気テキスト・現在気温・降水確率）を、
+         * 「現在時刻が属する3時間枠の hourly データ」に連動させて更新する。
+         * 最高/最低気温は daily の値（上位の updateWeather 側で設定済み）を維持する。
+         */
+        function refreshMainPanelFromHourly() {
+            if (!latestHourlyData) return;
+            const idx = findCurrentHourlyIndex(latestHourlyData);
+
+            const code = latestHourlyData.weathercode[idx];
+            const temp = Math.round(latestHourlyData.temperature_2m[idx]);
+            const rain = latestHourlyData.precipitation_probability[idx];
+
+            const descEl = document.getElementById('cw-desc');
+            const tempEl = document.getElementById('cw-temp');
+            const rainEl = document.getElementById('cw-rain');
+            if (descEl) descEl.textContent = getWeatherText(code);
+            if (tempEl) tempEl.textContent = temp + "°";
+            if (rainEl) rainEl.textContent = (rain ?? 0) + "%";
+        }
+
         async function updateWeather() {
             let lat = DEFAULT_LAT;
             let lon = DEFAULT_LON;
@@ -480,21 +552,21 @@
                 ]);
                 const data = await weatherRes.json();
 
-                // --- 1. 今日の天気 ---
-                const currentTemp = Math.round(data.current_weather.temperature);
+                // hourlyデータをキャッシュ（時間進行に応じた再描画に使用）
+                latestHourlyData = data.hourly;
+
+                // --- 1. 今日の最高/最低気温（daily）をまずセット ---
                 const daily0 = {
                     high: Math.round(data.daily.temperature_2m_max[0]),
-                    low: Math.round(data.daily.temperature_2m_min[0]),
-                    rain: data.daily.precipitation_probability_max[0],
-                    code: data.daily.weathercode[0]
+                    low: Math.round(data.daily.temperature_2m_min[0])
                 };
-
-                document.getElementById('cw-desc').textContent = getWeatherText(daily0.code);
                 document.getElementById('cw-loc').textContent = locName; 
-                document.getElementById('cw-temp').textContent = currentTemp + "°";
                 document.getElementById('cw-high').textContent = daily0.high + "°";
                 document.getElementById('cw-low').textContent = daily0.low + "°";
-                document.getElementById('cw-rain').textContent = daily0.rain + "%";
+
+                // --- 1b. 現在時刻が属する3時間枠の hourly に連動して
+                //         天気テキスト・気温・降水確率を上書き ---
+                refreshMainPanelFromHourly();
 
                 // --- 2. 3時間ごとのタイムライン ---
                 const hourlyContainer = document.getElementById('hourly-forecast');
@@ -574,7 +646,11 @@
             } catch (e) { console.error(e); }
         }
         updateWeather();
+        // APIからの再取得は30分ごと
         setInterval(updateWeather, 30 * 60 * 1000);
+        // メインパネルの「現在時刻枠」連動更新は5分ごと
+        // （3時間枠の境界を跨いだら自動的に表示が切り替わる）
+        setInterval(refreshMainPanelFromHourly, 5 * 60 * 1000);
 
     </script>
 </body>

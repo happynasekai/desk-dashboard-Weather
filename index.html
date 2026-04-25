@@ -148,14 +148,14 @@
             padding-top: 0.3rem;
         }
         
-        /* === 6列グリッドレイアウト ===
-           日付 / 天気テキスト / スペーサー(1fr) / 最高 / 最低 / 降水
-           スペーサー列を間に挟むことで、天気テキストの直後に余分な空白が
-           出ないようにし、データ列と密接させる */
+        /* === 5列グリッドレイアウト ===
+           日付 / 天気テキスト(4文字固定幅) / 最高 / 最低 / 降水
+           天気テキスト列を最大文字数(4文字)に合わせた固定幅にすることで、
+           各行で日付・データ列の位置が完璧に揃う */
         .forecast-row-min {
             display: grid;
-            grid-template-columns: 100px auto 1fr 90px 90px 90px;
-            column-gap: 22px;
+            grid-template-columns: 100px 90px 90px 90px 90px;
+            column-gap: 14px;
             align-items: center;
             width: 100%;
             font-size: 1.4rem;
@@ -265,16 +265,14 @@
             .hr-temp { font-size: 1.1rem; }
             .hr-rain { font-size: 0.9rem; }
 
-            /* === 週間予報グリッド：6列構成（PCと同じ） === */
-            /* 日付 / 天気テキスト / スペーサー / 最高 / 最低 / 降水確率 */
-            /* スペーサー(1fr)を間に入れて空白を「天気テキスト直後」ではなく中央寄りに集約し、
-               天気テキストとデータ列の間隔を詰める */
+            /* === 週間予報グリッド：5列構成（PCと同じ） === */
+            /* 日付 / 天気テキスト(4文字固定幅) / 最高 / 最低 / 降水確率 */
             .forecast-list {
                 gap: 0.6rem;
                 padding-top: 0.2rem;
             }
             .forecast-row-min {
-                grid-template-columns: 3.6rem auto 1fr auto auto auto;
+                grid-template-columns: 3.6rem 3.6rem auto auto auto;
                 column-gap: 6px;
                 font-size: 0.85rem;
             }
@@ -302,7 +300,7 @@
             .forecast-row-min {
                 font-size: 0.78rem;
                 column-gap: 4px;
-                grid-template-columns: 3.2rem auto 1fr auto auto auto;
+                grid-template-columns: 3.2rem 3.2rem auto auto auto;
             }
             .forecast-row-min .fc-desc {
                 font-size: 0.78rem;
@@ -640,13 +638,12 @@
                     const fmtT = n => `${Math.abs(n) < 10 ? FIG : ''}${n}°`;
                     const fmtR = n => `${n < 10 ? FIG : ''}${n}%`;
 
-                    // --- 6列構造で描画: スペーサー(空div)で空白を中央に集約 ---
+                    // --- 5列構造で描画: 天気列は固定幅で各行揃う ---
                     const row = document.createElement('div');
                     row.className = 'forecast-row-min';
                     row.innerHTML = `
                         <div class="fc-date ${dateClass}">${m}/${d}(${days[w]})</div>
                         <div class="fc-desc">${getWeatherText(code)}</div>
-                        <div class="fc-spacer"></div>
                         <div class="fc-data text-high">${svgUp}<span>${fmtT(high)}</span></div>
                         <div class="fc-data text-low">${svgDown}<span>${fmtT(low)}</span></div>
                         <div class="fc-data text-rain">${svgDrop}<span>${fmtR(rain)}</span></div>

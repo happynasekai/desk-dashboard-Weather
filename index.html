@@ -151,11 +151,12 @@
         /* === 5列グリッドレイアウト ===
            日付 / 天気テキスト(4文字固定幅) / 最高 / 最低 / 降水
            天気テキスト列を最大文字数(4文字)に合わせた固定幅にすることで、
-           各行で日付・データ列の位置が完璧に揃う */
+           各行で日付・データ列の位置が完璧に揃う。
+           column-gap を広めに取って全体を横に展開する。 */
         .forecast-row-min {
             display: grid;
             grid-template-columns: 100px 90px 90px 90px 90px;
-            column-gap: 14px;
+            column-gap: 40px;
             align-items: center;
             width: 100%;
             font-size: 1.4rem;

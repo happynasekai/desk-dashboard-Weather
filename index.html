@@ -148,10 +148,13 @@
             padding-top: 0.3rem;
         }
         
-        /* === 5列グリッドレイアウト === */
+        /* === 6列グリッドレイアウト ===
+           日付 / 天気テキスト / スペーサー(1fr) / 最高 / 最低 / 降水
+           スペーサー列を間に挟むことで、天気テキストの直後に余分な空白が
+           出ないようにし、データ列と密接させる */
         .forecast-row-min {
             display: grid;
-            grid-template-columns: 100px 150px 110px 110px 110px;
+            grid-template-columns: 100px auto 1fr 90px 90px 90px;
             column-gap: 22px;
             align-items: center;
             width: 100%;
@@ -262,22 +265,25 @@
             .hr-temp { font-size: 1.1rem; }
             .hr-rain { font-size: 0.9rem; }
 
-            /* === 週間予報グリッド：天気テキストを表示したまま5列を維持 === */
-            /* 日付 / 天気テキスト / 最高 / 最低 / 降水確率 を全て表示 */
+            /* === 週間予報グリッド：6列構成（PCと同じ） === */
+            /* 日付 / 天気テキスト / スペーサー / 最高 / 最低 / 降水確率 */
+            /* スペーサー(1fr)を間に入れて空白を「天気テキスト直後」ではなく中央寄りに集約し、
+               天気テキストとデータ列の間隔を詰める */
             .forecast-list {
                 gap: 0.6rem;
                 padding-top: 0.2rem;
             }
             .forecast-row-min {
-                grid-template-columns: 3.6rem minmax(0, 1fr) auto auto auto;
+                grid-template-columns: 3.6rem auto 1fr auto auto auto;
                 column-gap: 6px;
                 font-size: 0.85rem;
             }
-            /* 天気テキスト列：必ず表示（省略は ellipsis で対応） */
+            /* 天気テキスト列：必ず表示（短縮済みなので ellipsis 不要） */
             .forecast-row-min .fc-desc {
                 display: block;
                 font-size: 0.85rem;
                 min-width: 0;
+                white-space: nowrap;
             }
             /* データ列のアイコンサイズ調整 */
             .fc-data svg {
@@ -296,7 +302,7 @@
             .forecast-row-min {
                 font-size: 0.78rem;
                 column-gap: 4px;
-                grid-template-columns: 3.2rem minmax(0, 1fr) auto auto auto;
+                grid-template-columns: 3.2rem auto 1fr auto auto auto;
             }
             .forecast-row-min .fc-desc {
                 font-size: 0.78rem;
@@ -423,7 +429,7 @@
                 0: "快晴", 1: "晴れ", 2: "一部曇り", 3: "曇り",
                 45: "霧", 48: "霧",
                 51: "霧雨", 53: "霧雨", 55: "霧雨", 56: "霧雨", 57: "霧雨",
-                61: "弱いにわか雨", 63: "雨", 65: "強い雨", 66: "雨", 67: "強い雨",
+                61: "弱い雨", 63: "雨", 65: "強い雨", 66: "雨", 67: "強い雨",
                 71: "弱い雪", 73: "雪", 75: "大雪", 77: "雪",
                 80: "にわか雨", 81: "にわか雨", 82: "にわか雨",
                 85: "にわか雪", 86: "にわか雪",
@@ -634,12 +640,13 @@
                     const fmtT = n => `${Math.abs(n) < 10 ? FIG : ''}${n}°`;
                     const fmtR = n => `${n < 10 ? FIG : ''}${n}%`;
 
-                    // --- 5列構造で描画: 各列右揃え ---
+                    // --- 6列構造で描画: スペーサー(空div)で空白を中央に集約 ---
                     const row = document.createElement('div');
                     row.className = 'forecast-row-min';
                     row.innerHTML = `
                         <div class="fc-date ${dateClass}">${m}/${d}(${days[w]})</div>
                         <div class="fc-desc">${getWeatherText(code)}</div>
+                        <div class="fc-spacer"></div>
                         <div class="fc-data text-high">${svgUp}<span>${fmtT(high)}</span></div>
                         <div class="fc-data text-low">${svgDown}<span>${fmtT(low)}</span></div>
                         <div class="fc-data text-rain">${svgDrop}<span>${fmtR(rain)}</span></div>

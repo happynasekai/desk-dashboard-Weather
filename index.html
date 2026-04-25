@@ -193,7 +193,8 @@
             /* bodyをスクロール可能に & 縦中央寄せ */
             body {
                 height: auto;
-                min-height: 100vh;
+                min-height: 100vh;   /* 古いブラウザ用フォールバック */
+                min-height: 100dvh;  /* モダンブラウザ: アドレスバー込みの実表示領域基準 */
                 overflow-y: auto;
                 overflow-x: hidden;
                 align-items: center;

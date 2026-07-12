@@ -22,7 +22,6 @@
             align-items: center;
         }
 
-        /* スマホ時にbodyのoverflow:hiddenをリセット */
         @media (max-width: 600px) {
             body { overflow: visible !important; }
         }
@@ -365,11 +364,15 @@
             });
         }
 
-        // --- Fetch自動リトライ関数 (Exponential Backoff) ---
-        async function fetchWithRetry(url, retries = 3, delayMs = 2000) {
+        // --- 強制タイムアウト＆自動リトライ付きのfetch関数 ---
+        // timeoutMs: 1回の通信を見切る時間 (10秒) / delayMs: 失敗時の待機時間(2秒→4秒→8秒)
+        async function fetchWithTimeoutAndRetry(url, retries = 3, delayMs = 2000, timeoutMs = 10000) {
             for (let i = 0; i < retries; i++) {
                 try {
-                    const res = await fetch(url);
+                    const controller = new AbortController();
+                    const id = setTimeout(() => controller.abort(), timeoutMs);
+                    const res = await fetch(url, { signal: controller.signal });
+                    clearTimeout(id);
                     if (!res.ok) throw new Error(`HTTP Error: ${res.status}`);
                     return res;
                 } catch (err) {
@@ -449,7 +452,7 @@
             }, 400);
         }
 
-        // --- API更新処理 (自動リトライ対応) ---
+        // --- API更新処理 (タイムアウト＆自動リトライ対応) ---
         async function updateWeather() {
             isUpdatingAPI = true;
             let lat = DEFAULT_LAT;
@@ -463,12 +466,9 @@
 
             const WEATHER_URL = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&hourly=temperature_2m,precipitation_probability,weathercode&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=Asia%2FTokyo&forecast_days=8`;
 
-            const wrapper = document.getElementById('weather-wrapper');
-            if (wrapper) wrapper.classList.add('fade-out');
-
             try {
-                // 自動リトライ関数を使用して通信 (失敗時は2秒, 4秒, 8秒待機して再実行)
-                const weatherRes = await fetchWithRetry(WEATHER_URL);
+                // 通信・データ取得完了まで画面は古い状態のまま待機
+                const weatherRes = await fetchWithTimeoutAndRetry(WEATHER_URL);
                 
                 const [data, locName] = await Promise.all([
                     weatherRes.json(),
@@ -478,6 +478,11 @@
                 latestHourlyData = data.hourly;
                 cachedLocationName = locName;
 
+                // 取得が完全に成功した直後に画面をフェードアウト
+                const wrapper = document.getElementById('weather-wrapper');
+                if (wrapper) wrapper.classList.add('fade-out');
+
+                // アニメーションの時間差を利用してDOMを書き換え
                 setTimeout(() => {
                     const daily0 = { high: Math.round(data.daily.temperature_2m_max[0]), low: Math.round(data.daily.temperature_2m_min[0]) };
                     document.getElementById('cw-high').textContent = daily0.high + "°";
@@ -558,6 +563,7 @@
                         `;
                         listContainer.appendChild(row);
                     }
+                    // 書き換え後に画面を再表示
                     if (wrapper) wrapper.classList.remove('fade-out');
                 }, 400);
 
@@ -576,7 +582,8 @@
             const sec = now.getSeconds();
             const ms = now.getMilliseconds();
             const minsToNext = intervalMinutes - (min % intervalMinutes);
-            const msToNext = (minsToNext * 60 * 1000) - (sec * 1000) - ms;
+            let msToNext = (minsToNext * 60 * 1000) - (sec * 1000) - ms;
+            if (msToNext <= 0) msToNext += intervalMinutes * 60 * 1000;
             return msToNext;
         }
 

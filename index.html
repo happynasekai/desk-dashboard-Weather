@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Desk Dashboard Weather</title>
+    <title>Weather Dashboard</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text x=%2250%25%22 y=%2250%25%22 font-size=%2280%22 text-anchor=%22middle%22 dominant-baseline=%22central%22>☀️</text></svg>" type="image/svg+xml">
     <meta name="theme-color" content="#121212">
     
@@ -364,8 +364,6 @@
             });
         }
 
-        // --- 強制タイムアウト＆自動リトライ付きのfetch関数 ---
-        // timeoutMs: 1回の通信を見切る時間 (10秒) / delayMs: 失敗時の待機時間(2秒→4秒→8秒)
         async function fetchWithTimeoutAndRetry(url, retries = 3, delayMs = 2000, timeoutMs = 10000) {
             for (let i = 0; i < retries; i++) {
                 try {
@@ -386,7 +384,6 @@
         async function fetchLocationName(lat, lon) {
             const GEOCODE_URL = `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=ja`;
             try {
-                // 地名APIはリトライ不要(失敗時は現在地とする)
                 const res = await fetch(GEOCODE_URL);
                 if (!res.ok) return "現在地";
                 const data = await res.json();
@@ -425,7 +422,6 @@
             if (wrapper) wrapper.classList.remove('fade-out');
         }
 
-        // --- 5分おきのメインパネル更新 (API更新と重なる場合はスキップ) ---
         function refreshMainPanelFromHourly() {
             if (!latestHourlyData || isUpdatingAPI) return;
             
@@ -452,7 +448,6 @@
             }, 400);
         }
 
-        // --- API更新処理 (タイムアウト＆自動リトライ対応) ---
         async function updateWeather() {
             isUpdatingAPI = true;
             let lat = DEFAULT_LAT;
@@ -467,7 +462,6 @@
             const WEATHER_URL = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&hourly=temperature_2m,precipitation_probability,weathercode&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=Asia%2FTokyo&forecast_days=8`;
 
             try {
-                // 通信・データ取得完了まで画面は古い状態のまま待機
                 const weatherRes = await fetchWithTimeoutAndRetry(WEATHER_URL);
                 
                 const [data, locName] = await Promise.all([
@@ -478,11 +472,9 @@
                 latestHourlyData = data.hourly;
                 cachedLocationName = locName;
 
-                // 取得が完全に成功した直後に画面をフェードアウト
                 const wrapper = document.getElementById('weather-wrapper');
                 if (wrapper) wrapper.classList.add('fade-out');
 
-                // アニメーションの時間差を利用してDOMを書き換え
                 setTimeout(() => {
                     const daily0 = { high: Math.round(data.daily.temperature_2m_max[0]), low: Math.round(data.daily.temperature_2m_min[0]) };
                     document.getElementById('cw-high').textContent = daily0.high + "°";
@@ -563,7 +555,6 @@
                         `;
                         listContainer.appendChild(row);
                     }
-                    // 書き換え後に画面を再表示
                     if (wrapper) wrapper.classList.remove('fade-out');
                 }, 400);
 
@@ -575,7 +566,6 @@
             }
         }
 
-        // --- 起点同期ロジック (正時ベースの固定サイクル) ---
         function alignToNextInterval(intervalMinutes) {
             const now = new Date();
             const min = now.getMinutes();
@@ -588,20 +578,17 @@
         }
 
         function startSyncedIntervals() {
-            // 30分間隔タイマー (API更新: 毎時0分, 30分に発火)
             setTimeout(() => {
                 updateWeather();
                 setInterval(updateWeather, 30 * 60 * 1000);
             }, alignToNextInterval(30));
 
-            // 5分間隔タイマー (メインパネル更新: 毎時0分, 5分, 10分...に発火)
             setTimeout(() => {
                 refreshMainPanelFromHourly();
                 setInterval(refreshMainPanelFromHourly, 5 * 60 * 1000);
             }, alignToNextInterval(5));
         }
         
-        // 初回ロード時は即時API取得を実行し、その後にタイマーをスケジュールする
         updateWeather();
         startSyncedIntervals();
     </script>
